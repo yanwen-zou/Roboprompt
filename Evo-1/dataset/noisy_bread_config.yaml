@@ -1,0 +1,11 @@
+# do not change max_action_dim or max_state_dim
+max_action_dim: 24
+max_state_dim: 24
+max_views: 1
+
+data_groups:
+  flexiv_bread:
+    noisy_bread_20260522:
+      path: /mnt/workspace/data/yanwen/robocasa/real_robot_data/noisy_bread/20260522
+      view_map:
+        image_1: observation.images.robot0_agentview_left

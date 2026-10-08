@@ -1,0 +1,66 @@
+# ARMADA/FLOAT-style offline OT scoring with OpenPI policy embeddings.
+#
+# Usage:
+#   python scripts/offline_dagger/optimal_transport.py \
+#     --config scripts/offline_dagger/config/openpi.yaml
+#
+# Paths support ~ and environment variables such as $RP_DATA_ROOT.
+
+# Expert trajectories are resolved from features.openpi.config_name via the
+# OpenPI TrainConfig data.local_dataset_root.
+expert: {}
+
+rollout:
+  data_groups:
+    flexiv_bread:
+      toaster_right_rollout1:
+        path: robocasa_data_ckpt/real_robot_data/rollouts/lerobot-toaster-right-rollout1
+
+features:
+  kind: openpi
+  # ARMADA/FLOAT computes OT over policy embeddings, not raw robot state.
+  openpi:
+    config_name: pi05_flexiv_toaster_right
+    checkpoint_dir: robocasa_data_ckpt/pi05_flexiv_toaster_right_25000
+    # default_prompt and norm_stats_asset_id are read from the OpenPI train config
+    # unless explicitly overridden here.
+    base_image_view: observation.images.robot0_agentview_left
+    wrist_image_view: observation.images.robot0_eye_in_hand
+    state_column: observation.state
+    pooling: tokens
+    # Lower batch_size reduces both GPU memory and host RAM pressure during
+    # offline video embedding. Increase after confirming the machine stays stable.
+    batch_size: 16
+    device_index: 0
+    xla_preallocate: false
+    mmap_cache: true
+    log_cache_hits: false
+    # Actual cache path is cache_dir/<config_name>/..., so different OpenPI
+    # configs/checkpoints cannot share stale embeddings by accident.
+    cache_dir: outputs/offline_dagger/embedding_cache
+
+  max_steps: null
+  max_dim: null
+  require_finite: true
+  drop_nan_rows: false
+
+ot:
+  # cosine_distance is 1 - cosine_similarity, so lower cost means closer matching.
+  cost: cosine_distance
+  sinkhorn_reg: 0.05
+  sinkhorn_max_iter: 500
+  sinkhorn_tol: 1.0e-9
+  sinkhorn_eps: 1.0e-12
+  pad_expert_to_max_length: false
+  # The OT script loads one expert block, scans all rollouts against it, then
+  # releases the block. This avoids rereading every expert once per rollout.
+  expert_block_size: 24
+  # auto uses CUDA via PyTorch when available, otherwise falls back to numpy/cpu.
+  compute_device: auto
+  compute_dtype: float32
+  token_chunk_size: 32
+
+output:
+  csv: ot_costs_{timestamp}.csv
+  pairwise_csv: null
+  include_pairwise_costs_json: false

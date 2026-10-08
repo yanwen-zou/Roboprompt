@@ -1,0 +1,16 @@
+timm
+accelerate
+einop
+diffusers
+ninja
+pandas
+matplotlib
+pyarrow
+accelerator
+deepspeed
+websockets
+opencv-python
+swanlab
+wandb
+av
+fvcore

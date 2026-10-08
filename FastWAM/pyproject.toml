@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastwam"
+version = "0.1.0"
+description = "FastWAM: standalone Wan2.2-TI2V-5B training/inference package"
+dependencies = [
+  "accelerate",
+  "av",
+  "boto3",
+  "datasets",
+  "deepspeed",
+  "einops",
+  "gitpython",
+  "huggingface-hub",
+  "hydra-core",
+  "imageio",
+  "imageio-ffmpeg",
+  "jsonlines",
+  "modelscope",
+  "numpy",
+  "omegaconf",
+  "packaging",
+  "pandas",
+  "pillow",
+  "pyarrow",
+  "regex",
+  "rich",
+  "safetensors",
+  "termcolor",
+  "tqdm",
+  "transformers",
+  "typing-extensions",
+  "wandb",
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fastwam*"]

@@ -1,0 +1,65 @@
+[project]
+name = "roboprompt"
+version = "0.1.0"
+description = "Real-world RoboPrompt runtime and bundled policy models"
+readme = "README.md"
+requires-python = ">=3.11, <3.12"
+dependencies = [
+    "h5py>=3.10",
+    "openpi",
+    "openpi-client",
+    "sam-2",
+    "numpy>=1.24.4",
+    "datasets>=2.19,<4",
+    "tqdm>=4.66.1",
+    "hydra-core>=1.3.2",
+    "iopath>=0.1.10",
+    "pillow>=9.4.0",
+    "opencv-python>=4.13.0.92",
+    "eva-decord>=0.6.1",
+    "transformers==4.53.2",
+    "decord2>=3.2.0",
+    "imageio[ffmpeg]>=2.37.3",
+    "jax[cuda12]==0.5.3",
+    "opencv-python-headless>=4.13.0.92",
+    "google-genai>=1.71.0",
+    "pyarrow<21",
+    "wandb>=0.17",
+    "threadpoolctl>=3.6.0",
+    "cmake<4",
+    "chex==0.1.89",
+]
+
+[tool.uv.sources]
+openpi = { path = "openpi", editable = true }
+openpi-client = { path = "openpi/packages/openpi-client", editable = true }
+"sam-2" = { path = "dependencies/sam2", editable = true }
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = true
+
+[[tool.uv.dependency-metadata]]
+name = "lerobot"
+version = "0.3.3"
+requires-dist = [
+    "av",
+    "cmake",
+    "datasets",
+    "deepdiff",
+    "diffusers",
+    "draccus",
+    "einops",
+    "flask",
+    "gymnasium",
+    "huggingface-hub[cli,hf-transfer]",
+    "imageio[ffmpeg]",
+    "jsonlines",
+    "opencv-python",
+    "packaging",
+    "pynput",
+    "pyserial",
+    "rerun-sdk",
+    "termcolor",
+    "wandb",
+]

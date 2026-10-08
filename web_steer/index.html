@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0d0c" />
+    <title>RoboPrompt · Visual Steering</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="RoboPrompt home">
+        <span class="brand-mark">RP</span>
+        <span><strong>ROBOPROMPT</strong><small>VISUAL STEERING CONSOLE</small></span>
+      </a>
+      <div class="session">
+        <span id="connectionDot" class="status-dot"></span>
+        <span id="connectionText">WAITING FOR CLIENT</span>
+        <span class="divider"></span>
+        <span id="clock">--:--:--</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="viewer-panel">
+        <button id="sendButton" class="send-button" disabled><span>Send Prompt</span><small>COMMAND ↵</small></button>
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">LIVE OBSERVATION</span>
+          </div>
+          <div class="frame-meta">
+            <span>FRAME</span><strong id="frameId">—</strong>
+            <span>LATENCY</span><strong id="latency">—</strong>
+          </div>
+        </div>
+
+        <div id="stage" class="camera-stage" data-empty="true">
+          <img id="baseImage" crossorigin="anonymous" alt="Base camera observation" draggable="false" />
+          <canvas id="promptCanvas"></canvas>
+          <div id="emptyState" class="empty-state">
+            <div class="scan-icon"><span></span></div>
+            <strong>Waiting for camera</strong>
+            <p>Start the service and robot client to view the camera feed.</p>
+          </div>
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
+          <div class="camera-label"><span></span> BASE CAMERA / RGB</div>
+          <div id="drawHint" class="draw-hint">Press and drag to draw a trajectory</div>
+        </div>
+
+        <div class="viewer-foot">
+          <div class="tool-switch" role="tablist" aria-label="Prompt tool">
+            <button class="tool active" data-tool="trajectory" role="tab" aria-selected="true">
+              <span class="tool-icon trajectory-icon"></span><span><b>Trajectory</b><small>TRAJECTORY</small></span>
+            </button>
+            <button class="tool" data-tool="point" role="tab" aria-selected="false">
+              <span class="tool-icon point-icon"></span><span><b>Target Point</b><small>POINT</small></span>
+            </button>
+            <button class="tool" data-tool="global" role="tab" aria-selected="false">
+              <span class="tool-icon axes-icon"></span><span><b>Global Motion</b><small>GLOBAL</small></span>
+            </button>
+          </div>
+          <div class="history-actions">
+            <button id="undoButton" class="icon-button" title="Undo (Ctrl+Z)" disabled>↶</button>
+            <button id="clearButton" class="text-button" disabled>Clear Canvas</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-panel">
+        <p id="serverStatus" class="connection-status" role="status">Connecting…</p>
+        <section class="wrist-card">
+          <div class="card-title"><span><i></i>WRIST CAMERA</span><span id="wristState">OFFLINE</span></div>
+          <div class="wrist-view"><img id="wristImage" crossorigin="anonymous" alt="Wrist camera observation" /><span>NO SIGNAL</span></div>
+        </section>
+
+        <section class="control-section global-section">
+          <div class="control-heading"><span>Global Motion</span><small>NORMALIZED · BASE FRAME</small></div>
+          <div class="axis-control" data-axis="0">
+            <div class="axis-label"><b class="axis x">X</b><span>Left / Right</span><output>+0.00</output></div>
+            <input type="range" min="-1" max="1" step="0.01" value="0" aria-label="Global X" />
+          </div>
+          <div class="axis-control" data-axis="1">
+            <div class="axis-label"><b class="axis y">Y</b><span>Forward / Back</span><output>+0.00</output></div>
+            <input type="range" min="-1" max="1" step="0.01" value="0" aria-label="Global Y" />
+          </div>
+          <div class="axis-control" data-axis="2">
+            <div class="axis-label"><b class="axis z">Z</b><span>Up / Down</span><output>+0.00</output></div>
+            <input type="range" min="-1" max="1" step="0.01" value="0" aria-label="Global Z" />
+          </div>
+          <button id="zeroAxes" class="zero-button">Reset All Axes <kbd>0</kbd></button>
+        </section>
+
+        <section class="control-section compact">
+          <div class="seg-row"><span>Duration</span><div class="segmented" data-setting="effect"><button data-value="short_term">Short-term</button><button class="selected" data-value="long_term">Long-term</button></div></div>
+          <div class="seg-row"><span>Phase 1</span><div class="segmented" data-setting="source"><button class="selected" data-value="evo">EVO</button><button data-value="hardcode">Hardcoded</button></div></div>
+          <label class="denoise-row"><span>Phase 2 steps <output id="stepsOutput">0.0</output></span><input id="stepsInput" type="range" min="0" max="10" step="0.2" value="0" /></label>
+        </section>
+
+        <section class="prompt-summary">
+          <span class="eyebrow">PROMPT PAYLOAD</span>
+          <div><span>Visual Marks</span><strong id="visualSummary">None</strong></div>
+          <div><span>Drag Vector</span><strong id="dragSummary">[0.00, 0.00]</strong></div>
+          <div><span>Global Vector</span><strong id="globalSummary">[0.00, 0.00, 0.00]</strong></div>
+          <div><span>Inference Status</span><strong id="deliverySummary">Waiting for Prompt</strong></div>
+        </section>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </aside>
+    </main>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

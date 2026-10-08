@@ -1,0 +1,1 @@
+"""Shared hardware utility modules."""

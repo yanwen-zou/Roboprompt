@@ -1,0 +1,49 @@
+name: flexiv_bread_lerobot_v21_image
+
+image_shape: [3, 224, 224]
+offline_dataset_paths:
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-toaster-left/
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-toaster-right/
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-pot/
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-toaster-left_var/
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-toaster-right_var/
+  - /mnt/workspace/data/yanwen/robocasa/real_robot_data/bread/lerobot-pot_var/
+online_dataset_paths: []
+
+shape_meta: &shape_meta
+  obs:
+    agentview_image:
+      shape: ${task.image_shape}
+      type: rgb
+      lerobot_key: observation.images.robot0_agentview_left
+    wrist_image:
+      shape: ${task.image_shape}
+      type: rgb
+      lerobot_key: observation.images.robot0_eye_in_hand
+    robot_state:
+      shape: [8]
+      type: low_dim
+      lerobot_key: observation.state
+  action:
+    shape: [7]
+    lerobot_key: action
+
+env_runner:
+  _target_: diffusion_policy.env_runner.noop_image_runner.NoopImageRunner
+
+dataset:
+  _target_: diffusion_policy.dataset.lerobot_v21_image_dataset.LeRobotV21ImageDataset
+  shape_meta: *shape_meta
+  offline_dataset_paths: ${task.offline_dataset_paths}
+  online_dataset_paths: ${task.online_dataset_paths}
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1+${n_latency_steps}'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  n_obs_steps: ${dataset_obs_steps}
+  n_latency_steps: ${n_latency_steps}
+  seed: 42
+  val_ratio: 0.05
+  max_train_episodes: null
+  normalizer_mode: limits
+  online_filter_denoise_step_lt_max: false
+  online_denoise_step_max: null

@@ -1,0 +1,14 @@
+.vscode/
+.DS_Store
+__pycache__/
+*-checkpoint.ipynb
+.venv
+*.egg*
+*.pyc
+build/*
+_C.*
+outputs/*
+checkpoints/
+checkpoints/*.pt
+demo/backend/checkpoints/*.pt
+SAM_2.egg-info/

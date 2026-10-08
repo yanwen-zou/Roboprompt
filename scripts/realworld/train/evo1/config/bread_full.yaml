@@ -1,0 +1,124 @@
+# Evo-1 bread-data phase 2: resume from the action-expert checkpoint,
+# unfreeze the VLM, and train for 50000 steps.
+#
+# The launcher expands these placeholders in string values:
+#   {repo_root}, {evo1_root}, {run_name}, {TIME}, {home}
+
+runtime:
+  python_bin: auto
+  num_processes: 8
+  num_machines: 1
+  deepspeed_config_file: ds_config.json
+
+run:
+  name: bread_full_{TIME}
+  save_dir: "$RP_DATA_ROOT/evo1/{run_name}"
+  cache_dir: "{repo_root}/.cache/evo1_training_data"
+
+model:
+  device: cuda
+  vlm_name: OpenGVLab/InternVL3-1B
+  action_head: flowmatching
+  return_cls_only: false
+
+dataset:
+  type: lerobot
+  config_path: null
+  data_paths: null
+  image_size: 224
+  binarize_gripper: false
+  use_augmentation: true
+  num_workers: 4
+  prompt_task_dropout_prob: 0.2
+  prompt_motion_noise_std: 0.005
+  video_dropout: 0.3
+
+  max_action_dim: 24
+  max_state_dim: 24
+  max_views: 2
+
+  data_groups:
+    flexiv_bread:
+      lerobot_pot:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-pot
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_pot_var:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-pot_var
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_toaster_left:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-toaster-left
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_toaster_left_var:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-toaster-left_var
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_toaster_right:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-toaster-right
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_toaster_right_ext:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-toaster-right-ext
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_toaster_right_var:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-toaster-right_var
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      lerobot_reverse-toaster:
+        path: $RP_DATA_ROOT/real_robot_data/bread/lerobot-reverse-toaster
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+      pick-bread-dagger:
+        path: $RP_DATA_ROOT/real_robot_data/bread/pick-bread-dagger
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+
+
+shape:
+  horizon: 24
+  per_action_dim: 24
+  state_dim: 24
+
+optimization:
+  lr: 1e-5
+  batch_size: 16
+  max_steps: 50000
+  warmup_steps: 1000
+  grad_clip_norm: 1.0
+  weight_decay: 1e-5
+  dropout: 0.0
+  num_layers: 8
+
+loss:
+  # Scale-invariant L2 penalty on relative changes between adjacent raw XYZ deltas.
+  # Combines direction and relative magnitude; emphasizes isolated sharp turns.
+  action_smoothness_weight: 0.02
+  action_smoothness_dims: 3
+  action_smoothness_min_norm: 1.0e-4
+  wrist_loss_weight: 0
+  traj_loss_weight: 30.0
+  point_loss_weight: 15.0
+  primitive_loss_weight: 5
+
+  # aux loss ablation
+  # traj_loss_weight: 0.0 
+  # point_loss_weight: 0.0
+  # primitive_loss_weight: 0.0
+  
+
+logging:
+  log_interval: 10
+  ckpt_interval: 2500
+  disable_wandb: false
+
+resume:
+  enabled: true
+  path: "$RP_DATA_ROOT/evo1/bread_action_{TIME}/step_final"
+  pretrain: true
+
+finetuning:
+  action_head: true
+  vlm: true

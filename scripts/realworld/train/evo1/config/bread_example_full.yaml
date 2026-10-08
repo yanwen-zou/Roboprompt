@@ -1,0 +1,81 @@
+# Single-GPU bread example used by the root README.
+runtime:
+  python_bin: auto
+  num_processes: 1
+  num_machines: 1
+  deepspeed_config_file: ds_config.json
+
+run:
+  name: bread_example_full_{TIME}
+  save_dir: "$RP_DATA_ROOT/evo1/{run_name}"
+  cache_dir: "{repo_root}/.cache/evo1_training_data"
+
+model:
+  device: cuda
+  vlm_name: OpenGVLab/InternVL3-1B
+  action_head: flowmatching
+  return_cls_only: false
+
+dataset:
+  type: lerobot
+  config_path: null
+  data_paths: null
+  image_size: 224
+  cmd_type: state
+  binarize_gripper: false
+  use_augmentation: true
+  num_workers: 4
+  prompt_task_dropout_prob: 0.2
+  prompt_motion_noise_std: 0.005
+  video_dropout: 0.3
+
+  max_action_dim: 24
+  max_state_dim: 24
+  max_views: 2
+
+  data_groups:
+    flexiv_bread:
+      play:
+        path: $RP_DATA_ROOT/Roboprompt_Play_Data/bread
+        view_map:
+          image_1: observation.images.robot0_agentview_left
+
+shape:
+  horizon: 24
+  per_action_dim: 24
+  state_dim: 24
+
+optimization:
+  lr: 1e-5
+  batch_size: 16
+  max_steps: 30000
+  warmup_steps: 1000
+  grad_clip_norm: 1.0
+  weight_decay: 1e-5
+  dropout: 0.0
+  num_layers: 8
+
+loss:
+  # Scale-invariant L4 penalty on relative changes between adjacent raw XYZ deltas.
+  # Combines direction and relative magnitude; emphasizes isolated sharp turns.
+  action_smoothness_weight: 0.02
+  action_smoothness_dims: 3
+  action_smoothness_min_norm: 1.0e-4
+  wrist_loss_weight: 0
+  traj_loss_weight: 0.0
+  point_loss_weight: 0.0
+  primitive_loss_weight: 0.0
+
+logging:
+  log_interval: 10
+  ckpt_interval: 2500
+  disable_wandb: true
+
+resume:
+  enabled: true
+  path: "$RP_DATA_ROOT/evo1/bread_example_action_{TIME}/step_final"
+  pretrain: true
+
+finetuning:
+  action_head: true
+  vlm: true

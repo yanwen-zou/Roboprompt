@@ -1,0 +1,69 @@
+# ARMADA/FLOAT-style offline OT scoring with Diffusion Policy obs embeddings.
+#
+# Usage:
+#   python scripts/offline_dagger/optimal_transport.py \
+#     --config scripts/offline_dagger/config/dp.yaml
+#
+# Paths support ~ and environment variables such as $RP_DATA_ROOT.
+
+expert:
+  data_groups:
+    flexiv_bread:
+      toaster_left:
+        path: robocasa_data_ckpt/real_robot_data/bread/lerobot-toaster-left
+      toaster_right:
+        path: robocasa_data_ckpt/real_robot_data/bread/lerobot-toaster-right
+      toaster_right_var:
+        path: robocasa_data_ckpt/real_robot_data/bread/lerobot-toaster-right_var
+      toaster_right_ext:
+        path: robocasa_data_ckpt/real_robot_data/bread/lerobot-toaster-right-ext
+      pot:
+        path: robocasa_data_ckpt/real_robot_data/bread/lerobot-pot
+
+rollout:
+  data_groups:
+    flexiv_bread:
+      toaster_right_rollout1:
+        path: robocasa_data_ckpt/real_robot_data/rollouts/lerobot-toaster-right-rollout1
+
+features:
+  kind: diffusion_policy
+  # Computes OT over Diffusion Policy obs_encoder embeddings.
+  diffusion_policy:
+    config_name: diffusion_policy_flexiv_bread
+    checkpoint_path: realworld_ckpt/diffusion_policy/16.54.54_train_diffusion_transformer_hybrid_flexiv_bread_lerobot_v21_image
+    use_ema: true
+    device: cuda:0
+    pooling: obs_encoder
+    batch_size: 32
+    mmap_cache: true
+    log_cache_hits: false
+    cache_dir: outputs/offline_dagger/embedding_cache
+
+  max_steps: null
+  max_dim: null
+  require_finite: true
+  drop_nan_rows: false
+
+ot:
+  # cosine_distance is 1 - cosine_similarity, so lower cost means closer matching.
+  cost: cosine_distance
+  sinkhorn_reg: 0.05
+  sinkhorn_max_iter: 500
+  sinkhorn_tol: 1.0e-9
+  sinkhorn_eps: 1.0e-12
+  pad_expert_to_max_length: false
+  expert_block_size: 24
+  compute_device: auto
+  compute_dtype: float32
+  token_chunk_size: 32
+  length_penalty:
+    enabled: true
+    # Adds weight * max(0, rollout_length / median_expert_length - 1)
+    # to the selected rollout/expert OT cost.
+    weight: 0.05
+
+output:
+  csv: dp_ot_costs_{timestamp}.csv
+  pairwise_csv: null
+  include_pairwise_costs_json: false

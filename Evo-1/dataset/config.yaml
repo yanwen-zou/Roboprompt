@@ -1,0 +1,75 @@
+# do not change max_action_dim or max_state_dim
+max_action_dim: 24
+max_state_dim: 24
+max_views: 1
+
+data_groups:
+  ##############################################################################
+  # Your embodiment_name:
+  #   your_dataset_name:
+  #     path: /path/to/your/dataset
+  #     view_map:
+  #       image_1: observation.images.image_1
+  #       image_2: observation.images.image_2
+  #       image_3: observation.images.image_3
+################################################################################
+  flexiv_bread:
+    noisy_bread:
+      path: /mnt/workspace/data/yanwen/robocasa/real_robot_data/noisy_bread/20260522
+      view_map:
+        image_1: observation.images.image
+
+
+
+  # This is an example of how to configure the dataset path and view mapping for MetaWorld
+  # metaworld_sawyer:
+  #   Evo1_MetaWorld:
+  #     path: /home/dell/code/lintao/Evo_1/Evo1_training_dataset/Evo1_MetaWorld_Dataset
+  #     view_map:
+  #       image_1: observation.images.image
+
+
+
+  # This is an example of how to configure multi-task training for LIBERO.
+  # The libero dataset is from https://huggingface.co/collections/IPEC-COMMUNITY/libero-benchmark-dataset
+
+  # libero_franka:
+  #   libero_spatial_no_noops_1.0.0_lerobot:
+  #     path: /share/taolin/datasets/libero/libero_spatial_no_noops_1.0.0_lerobot
+  #     view_map:
+  #       image_1: observation.images.image
+  #       image_2: observation.images.wrist_image
+
+  #   libero_object_no_noops_1.0.0_lerobot:
+  #     path: /share/taolin/datasets/libero/libero_object_no_noops_1.0.0_lerobot
+  #     view_map:
+  #       image_1: observation.images.image
+  #       image_2: observation.images.wrist_image
+
+  #   libero_goal_no_noops_1.0.0_lerobot:
+  #     path: /share/taolin/datasets/libero/libero_goal_no_noops_1.0.0_lerobot
+  #     view_map:
+  #       image_1: observation.images.image
+  #       image_2: observation.images.wrist_image
+
+  #   libero_10_no_noops_1.0.0_lerobot:
+  #     path: /share/taolin/datasets/libero/libero_10_no_noops_1.0.0_lerobot
+  #     view_map:
+  #       image_1: observation.images.image
+  #       image_2: observation.images.wrist_image
+
+
+
+
+
+
+
+  # This is an example of how to configure the dataset path and view mapping for RoboTwin
+
+  # robotwin_robot:
+  # click_alarmclock_v2.1:
+  #   path: /share/taolin/datasets/robotwin/click_alarmclock_v2.1
+  #   view_map:
+  #     image_1: observation.images.image_1
+  #     image_2: observation.images.image_2
+  #     image_3: observation.images.image_3
